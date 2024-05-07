@@ -42,27 +42,4 @@ class Server {
     }
 }
 
-// function addNode(uri) {
-//     let foundNodes = nodes.filter(node => node === uri);
-//     if(foundNodes.length == 0){
-//         console.log(`Adding new Node/Peer to collection. Node: ${uri}`)
-//         nodes.push(uri)
-//     }
-//     else {
-//         console.log('mam juz node!');
-//     }
-// }
-
-// function getNodes() {
-//     return nodes
-// }
-
-// function removeNode(uri) {
-//     nodes = nodes.filter(node => node != uri)
-// }
-
-// function pickRandomNode() {
-//     return nodes[Math.floor(Math.random() * nodes.length)]
-// }
-
 module.exports = Server

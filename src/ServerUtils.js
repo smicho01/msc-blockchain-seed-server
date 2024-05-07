@@ -1,7 +1,7 @@
 const { LogsColours, log } = require("../colours");
-const { SEED_SERVERS, PROFILE, HTTP_PORT, APP_IP, CURRENT_SERVER } = require("../config");
+const { SEED_SERVERS, PROFILE, HTTP_PORT, APP_IP, CURRENT_SERVER, BLOCKCHAIN_NODES_API_ENDPOINTS } = require("../config");
 const fetch = require('cross-fetch');
-const { SeedServers } = require("../initializer");
+const { SeedServers, BlockchainEndpoints, BlockchainNodes } = require("../initializer");
 
 function updateSeedServersList() {
     log(`Updating seed servers list for profile: ${PROFILE} `);
@@ -32,8 +32,8 @@ function updateSeedServersList() {
                     log(`Seed server: ${server} heartbeat signal 2check status: ${returned.message}`, LogsColours.BgYellow);
                 }
             }).catch(err => {
-                log('LIPA !!', LogsColours.BgRed)
-                removeServerFromList(server)
+                log("Can't reach seed server", LogsColours.BgRed)
+                removeSeedServerFromList(server)
 
             })
         } catch (error) {
@@ -42,15 +42,48 @@ function updateSeedServersList() {
 
     });
 
-
+    log(`Registered Blockchain API endpoints: ${BlockchainEndpoints.getNodes()}`)
 }
 
-function broadcastBlockchainNodeToAllProfileSeedServers(node) {
+function updateBlockchainNodesEndpointsList() {
+    log(`Updating Blockchain nodes list for profile: ${PROFILE} `);
+    let someUpdate = 'OLD UPDATE';
+    BLOCKCHAIN_NODES_API_ENDPOINTS[PROFILE].forEach(server => {
+        log(`Fetching Blockchain node endpoint: ${server}`);
+        // Check server heartbeat signal and if server present, send POST to register server
+        try {
+            fetch(`${server}/node/healthcheck`, {
+                method: "GET"
+            }).then((response) => {
+                return response.json()
+            }).then(returned => {
+                const thsiServer = `http://${CURRENT_SERVER}:${HTTP_PORT}`
+                if (returned.message === 'healthy') {
+                   
+                } else {
+                    log(`Blockchain node: ${server} heartbeat signal 2check status: ${returned.message}`, LogsColours.BgYellow);
+                }
+            }).catch(err => {
+                log("Can't Blockchain node endpoint", LogsColours.BgRed)
+                removeBlockchainNodeEndpointFromList(server)
+            })
+        } catch (error) {
+
+        }
+
+    });
+
+    log(`Registered Blockchain API endpoints: ${BlockchainEndpoints.getNodes()}`)
+}
+
+updateBlockchainNodesEndpointsList
+
+function broadcastBlockchainNodeToAllProfileSeedServers(node, nodeApiUrl) {
     log(`Broadcasting node ${node} to all seed servers in the profile ${PROFILE}`, LogsColours.BgCyan);
     SEED_SERVERS[PROFILE].forEach(server => {
         if (server !== CURRENT_SERVER) {
             //log(`Broadcasting node: ${node} to seed server: ${server}`, LogsColours.BgGreen)
-            fetch(`${server}/blockchainnode/register?node=${node}`, {
+            fetch(`${server}/blockchainnode/register?node=${node}&apiurl=${nodeApiUrl}`, {
                 method: "POST"
             }).then((response) => {
                 return response.json()
@@ -98,9 +131,8 @@ function registerServerWithAllSeedServers(server) {
     });
 }
 
-function removeServerFromList(server) {
+function removeSeedServerFromList(server) {
     log(`Removing server ${server} from Seed Servers list`, LogsColours.BgRed)
-
     const index = SEED_SERVERS[PROFILE].indexOf(server);
     if (index > -1) { // only splice array when item is found
         SEED_SERVERS[PROFILE].splice(index, 1); // 2nd parameter means remove one item only
@@ -109,7 +141,19 @@ function removeServerFromList(server) {
     log(`Updated Seed Servers list: ${SEED_SERVERS[PROFILE]}`, LogsColours.FgGreen)
 }
 
+function removeBlockchainNodeEndpointFromList(server) {
+    log(`Removing Blockchain node endpoint ${server} from list`, LogsColours.BgRed)
+
+    const index = BLOCKCHAIN_NODES_API_ENDPOINTS[PROFILE].indexOf(server);
+    if (index > -1) { // only splice array when item is found
+        BLOCKCHAIN_NODES_API_ENDPOINTS[PROFILE].splice(index, 1); // 2nd parameter means remove one item only
+    }
+    BlockchainEndpoints.removeNode(server)
+    log(`Updated Blockchain nodes list: ${BLOCKCHAIN_NODES_API_ENDPOINTS[PROFILE]}`, LogsColours.FgGreen)
+}
+
 module.exports = {
-    updateSeedServersList, broadcastBlockchainNodeToAllProfileSeedServers,
-    removeServerFromList, registerServerWithAllSeedServers
+    updateSeedServersList, updateBlockchainNodesEndpointsList, 
+    broadcastBlockchainNodeToAllProfileSeedServers,
+    removeSeedServerFromList, registerServerWithAllSeedServers
 }

@@ -6,12 +6,10 @@ require('dotenv/config')
 const seedServersRoutes = require('./routes/seedserver-route')
 const { PROFILE, HTTP_PORT, CURRENT_SERVER } = require('./config')
 const { log, LogsColours } = require('./colours')
-
-
 /* Crone Jobs */
 const { cronejob_update_seed_servers_list } = require('./src/crone-jobs')
-
 const { BlockchainNodes, SeedServers } = require('./initializer')
+const { registerServerWithAllSeedServers } = require('./src/ServerUtils')
 
 const app = express()
 
@@ -20,11 +18,9 @@ app.use(bodyParser.json())
 /* ROUTES */
 /* BC routes */
 const blockchainRoutes = require('./routes/blockchainnode-route')
-const { registerServerWithAllSeedServers } = require('./src/ServerUtils')
 app.use('/blockchainnode', blockchainRoutes)
 
 /* Seer Servers Routes */
-
 app.use('/seedserver', seedServersRoutes)
 
 /* Healthcheck */
@@ -41,7 +37,6 @@ app.listen(HTTP_PORT, () => {
 function initialize() {
   registerServerWithAllSeedServers(`http://${CURRENT_SERVER}:${HTTP_PORT}`)
   cronejob_update_seed_servers_list()
-  
 }
 
 initialize()

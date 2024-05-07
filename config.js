@@ -21,6 +21,11 @@ let SEED_SERVERS = {
     ]
 }
 
+let BLOCKCHAIN_NODES_API_ENDPOINTS = {
+    "dev": [],
+    "prod": []
+}
+
 function addSeedServer(seedServer, profile) {
     const foundSever = findServerInProfile(seedServer, profile)
     if (foundSever === undefined) {
@@ -33,4 +38,16 @@ function findServerInProfile(seedServer, profile) {
     return SEED_SERVERS[profile].find(server => server === seedServer);
 }
 
-module.exports = { SEED_SERVERS, HTTP_PORT, PROFILE, APP_IP, CURRENT_SERVER, addSeedServer, findServerInProfile }
+function addBlockchainNodeApiEndpoint(apiurl, profile) {
+    const foundSever = findBlockchainNodeApiEndpointInProfile(apiurl, profile)
+    if (foundSever === undefined) {
+        console.log(`Updating BLOCKCHAIN_NODES_API_ENDPOINTS list for profile ${profile} with new server ${apiurl}`);
+        BLOCKCHAIN_NODES_API_ENDPOINTS[profile].push(apiurl)
+    }
+}
+function findBlockchainNodeApiEndpointInProfile(apiurl, profile) {
+    return BLOCKCHAIN_NODES_API_ENDPOINTS[profile].find(server => server === apiurl);
+}
+
+module.exports = { SEED_SERVERS, BLOCKCHAIN_NODES_API_ENDPOINTS, HTTP_PORT, PROFILE, APP_IP, CURRENT_SERVER, 
+    addSeedServer, findServerInProfile, addBlockchainNodeApiEndpoint }
