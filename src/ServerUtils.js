@@ -32,7 +32,7 @@ function updateSeedServersList() {
                     log(`Seed server: ${server} heartbeat signal 2check status: ${returned.message}`, LogsColours.BgYellow);
                 }
             }).catch(err => {
-                log('LIPA !!', LogsColours.BgRed)
+                log('ERROR while updating seed servers list.' + err, LogsColours.BgRed)
                 removeServerFromList(server)
 
             })

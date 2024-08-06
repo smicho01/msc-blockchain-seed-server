@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  seed-server-1:
+    image: 'sever3d/blockchainseedserver'
+    ports:
+    - '6001:3030'
+    restart: always
+    environment:
+      - PROFILE=dev
+      - SEEDSERVERS_LIST=http://semicorp.org:6001,http://semicorp.org:6002
+
+  seed-server-2:
+    image: 'sever3d/blockchainseedserver'
+    ports:
+    - '6002:3030'
+    restart: always
+    environment:
+      - PROFILE=dev
+      - SEEDSERVERS_LIST=http://semicorp.org:6001,http://semicorp.org:6002
